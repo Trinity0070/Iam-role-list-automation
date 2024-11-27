@@ -13,6 +13,9 @@ ec2 = boto3.client('ec2')
 def lambda_handler(event, context):
     # Initialize a defaultdict to track IAM roles and the instances they are attached to
     role_to_instances = defaultdict(list)
+    
+    # List for storing instance without IAM Role
+    instances_without_role = []
 
     # Describe EC2 instances (running and stopped)
     try:
@@ -39,8 +42,11 @@ def lambda_handler(event, context):
             # Track IAM roles to multiple instances
             if instance_iam_role:
                 role_to_instances[instance_iam_role].append(instance_id)
+            else:
+                instances_without_role.append(instance_id)
 
     # Return only IAM roles and the instances attached to them
     return {
-        'IamRoles': role_to_instances
+        'IamRoles': role_to_instances,
+        'InstancesWithoutRole': instances_without_role
     }
